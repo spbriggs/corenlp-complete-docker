@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM debian:latest
 
 RUN apt-get update -y && \
 	apt-get install -y apt-utils \
@@ -6,14 +6,16 @@ RUN apt-get update -y && \
 		default-jdk \
 		ant \
 		unzip \
+		bsdtar \
 		wget \
 		git
 
-RUN export REL_DATE="2018-10-05"; \
-	wget http://nlp.stanford.edu/software/stanford-corenlp-full-${REL_DATE}.zip; \
-	unzip stanford-corenlp-full-${REL_DATE}.zip; \
-	mv stanford-corenlp-full-${REL_DATE} CoreNLP; \
+RUN export REL_DATE=""; \
+	mkdir CoreNLP; \
 	cd CoreNLP; \
+	wget http://nlp.stanford.edu/software/stanford-corenlp-latest.zip; \
+	bsdtar --strip-components=1 -xvf stanford-corenlp-latest.zip; \
+	rm stanford-corenlp-latest.zip; \
 	export CLASSPATH=""; for file in `find . -name "*.jar"`; do export CLASSPATH="$CLASSPATH:`realpath $file`"; done
 
 ENV PORT 9000
@@ -23,3 +25,4 @@ EXPOSE 9000
 WORKDIR CoreNLP
 
 CMD java -cp '*' -mx4g edu.stanford.nlp.pipeline.StanfordCoreNLPServer
+
